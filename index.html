@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Gym Exercise Data Mining</title>
+  <style>
+    :root {
+      --ink: #f7f8fb;
+      --muted: #a7b0c2;
+      --lime: #b7f34b;
+      --cyan: #4ee1d0;
+      --panel: #151923;
+      --line: #2a3040;
+      --page: #0b0e14
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font: 18px/1.5 Inter, ui-sans-serif, system-ui, sans-serif;
+      overflow: hidden
+    }
+
+    body:before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(#ffffff05 1px, transparent 1px), linear-gradient(90deg, #ffffff05 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, #000, transparent 82%)
+    }
+
+    header {
+      height: 68px;
+      padding: 0 5vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0b0e14e8;
+      box-shadow: 0 10px 35px #0003;
+      backdrop-filter: blur(18px)
+    }
+
+    header strong {
+      letter-spacing: .16em;
+      font-size: .78rem
+    }
+
+    header span {
+      color: var(--muted);
+      font-size: .8rem
+    }
+
+    main {
+      height: calc(100vh - 126px);
+      position: relative
+    }
+
+    .slide {
+      display: none;
+      height: 100%;
+      padding: 5vh 8vw;
+      align-content: center
+    }
+
+    .slide.active {
+      display: grid
+    }
+
+    .eyebrow {
+      color: var(--lime);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .2em;
+      text-transform: uppercase
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 5vw, 5rem);
+      line-height: 1.04;
+      margin: .2em 0
+    }
+
+    .slide:not(.cover) h1 {
+      font-size: clamp(2rem, 3.5vw, 3.7rem)
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      margin: .2rem 0
+    }
+
+    .lead {
+      max-width: 800px;
+      color: var(--muted);
+      font-size: 1.25rem
+    }
+
+    .cover {
+      grid-template-columns: 1.1fr .9fr;
+      gap: 6vw;
+      background: radial-gradient(circle at 78% 42%, #4ee1d01c, transparent 30%)
+    }
+
+    .hero {
+      display: grid;
+      place-items: center
+    }
+
+    .equipment {
+      position: relative;
+      width: min(35vw, 440px);
+      aspect-ratio: 1;
+      border-radius: 36px;
+      background: linear-gradient(145deg, #171c28, #0f121a);
+      box-shadow: 0 35px 90px #0008;
+      overflow: hidden
+    }
+
+    .equipment:before {
+      content: "DATA / STRENGTH";
+      position: absolute;
+      top: 28px;
+      left: 30px;
+      color: #6f7a8e;
+      font: 700 .65rem/1 system-ui;
+      letter-spacing: .2em
+    }
+
+    .equipment:after {
+      content: "";
+      position: absolute;
+      inset: 18%;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 1px #4ee1d02e
+    }
+
+    .bar {
+      position: absolute;
+      left: 18%;
+      right: 18%;
+      top: 49%;
+      height: 12px;
+      background: var(--ink);
+      border-radius: 8px;
+      box-shadow: 0 0 40px #4ee1d044
+    }
+
+    .plate {
+      position: absolute;
+      top: 35%;
+      width: 50px;
+      height: 30%;
+      border-radius: 9px;
+      background: var(--lime);
+      box-shadow: 0 0 35px #b7f34b33
+    }
+
+    .plate.left {
+      left: 21%
+    }
+
+    .plate.right {
+      right: 21%
+    }
+
+    .plate:after {
+      content: "";
+      position: absolute;
+      inset: 12px 10px;
+      border-radius: 5px;
+      box-shadow: inset 0 0 0 1px #0b0e1466
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 30px
+    }
+
+    .card {
+      background: linear-gradient(145deg, #171c27, var(--panel));
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 14px 34px #0003
+    }
+
+    .card b {
+      display: block;
+      color: var(--lime);
+      font-size: 2rem
+    }
+
+    .card p {
+      color: var(--muted);
+      margin: .4em 0 0
+    }
+
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      margin-top: 36px
+    }
+
+    .flow article {
+      flex: 1;
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 14px 34px #0003
+    }
+
+    .flow i {
+      align-self: center;
+      color: var(--cyan);
+      font-style: normal;
+      font-size: 1.5rem
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 42px;
+      align-items: center
+    }
+
+    .chart {
+      width: 100%;
+      max-height: 52vh;
+      object-fit: contain;
+      background: #fff;
+      border-radius: 18px;
+      padding: 10px;
+      box-shadow: 0 18px 45px #0005
+    }
+
+    ul {
+      padding-left: 1.2em
+    }
+
+    li {
+      margin: .65em 0
+    }
+
+    li::marker {
+      color: var(--lime)
+    }
+
+    .metric {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 28px
+    }
+
+    .metric div {
+      background: var(--panel);
+      padding: 22px;
+      border-radius: 16px;
+      box-shadow: 0 14px 34px #0003
+    }
+
+    .metric b {
+      font-size: 1.8rem;
+      display: block;
+      color: var(--lime)
+    }
+
+    .metric span {
+      font-size: .85rem;
+      color: var(--muted)
+    }
+
+    .results {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      font-variant-numeric: tabular-nums
+    }
+
+    .results th,
+    .results td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .results th {
+      color: var(--muted);
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    .results td:not(:first-child),
+    .results th:not(:first-child) {
+      text-align: right
+    }
+
+    .results .best {
+      color: var(--lime);
+      font-weight: 800
+    }
+
+    .warning {
+      background: #171c27;
+      padding: 20px 24px;
+      border-radius: 10px;
+      margin-top: 24px;
+      color: #d8deea
+    }
+
+    .notes {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: .95rem
+    }
+
+    .code-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 24px;
+      margin-top: 26px;
+      align-items: stretch
+    }
+
+    .code-panel,
+    .result-panel {
+      background: #11151e;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 18px 45px #0004
+    }
+
+    .code-panel span,
+    .result-panel span {
+      display: block;
+      margin-bottom: 14px;
+      color: var(--lime);
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      color: #dfe5ef;
+      font: 500 .86rem/1.65 ui-monospace, SFMono-Regular, Menlo, monospace
+    }
+
+    .code-panel em {
+      color: var(--cyan);
+      font-style: normal
+    }
+
+    .result-panel strong {
+      display: block;
+      font-size: 2.2rem;
+      color: var(--lime);
+      line-height: 1.1
+    }
+
+    .result-panel p {
+      color: var(--muted)
+    }
+
+    .reason {
+      margin-top: 18px;
+      color: #dbe1ec
+    }
+
+    .reason b {
+      color: var(--cyan)
+    }
+
+    footer {
+      height: 58px;
+      background: #0b0e14e8;
+      box-shadow: 0 -10px 35px #0003;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      background: var(--panel);
+      color: var(--ink);
+      padding: 10px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 20px #0004
+    }
+
+    button:hover {
+      color: var(--lime)
+    }
+
+    button:focus-visible {
+      outline: 3px solid var(--cyan);
+      outline-offset: 3px
+    }
+
+    button:disabled {
+      opacity: .3
+    }
+
+    .progress {
+      width: 180px;
+      height: 4px;
+      background: var(--line);
+      border-radius: 4px;
+      overflow: hidden
+    }
+
+    .progress i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--lime), var(--cyan))
+    }
+
+    @media(max-width:800px) {
+      body {
+        font-size: 15px
+      }
+
+      .cover,
+      .split,
+      .code-grid {
+        grid-template-columns: 1fr
+      }
+
+      .hero {
+        display: none
+      }
+
+      .grid {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: 1fr 1fr
+      }
+
+      .flow i {
+        display: none
+      }
+
+      .metric {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .slide {
+        padding: 3vh 6vw
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header><strong>GYM MINING</strong><span>IS-212 · Data and Knowledge Mining</span></header>
+  <main>
+    <section class="slide cover active">
+      <div><span class="eyebrow">Semester Project</span>
+        <h1>Gym Exercise Data Mining</h1>
+        <p class="lead">Finding exercise patterns, groups and categories from a public exercise catalogue.</p>
+        <p><b>[Student Name]</b><br>[Roll Number]</p>
+      </div>
+      <div class="hero" aria-label="Abstract barbell illustration">
+        <div class="equipment"><span class="bar"></span><span class="plate left"></span><span
+            class="plate right"></span></div>
+      </div>
+    </section>
+    <section class="slide">
+      <div><span class="eyebrow">Project scope</span>
+        <h1>One dataset, six clear stages</h1>
+        <p class="lead">The project uses 850 exercises and follows the Knowledge Discovery in Databases workflow.</p>
+        <div class="grid">
+          <div class="card"><b>850</b>
+            <p>exercise records</p>
+          </div>
+          <div class="card"><b>12</b>
+            <p>original attributes</p>
+          </div>
+          <div class="card"><b>6</b>
+            <p>executed notebooks</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div><span class="eyebrow">Dataset source and citation</span>
+        <h1>Where the data came from</h1>
+        <p class="lead">850 English exercise records collected from the public wger exercise catalogue.</p>
+        <ul>
+          <li>Source: <a href="https://wger.de/" target="_blank" rel="noopener noreferrer" style="color:inherit">wger Workout Manager</a></li>
+          <li>Endpoint: <a href="https://wger.de/api/v2/exerciseinfo/?language=2&amp;limit=100" target="_blank" rel="noopener noreferrer" style="color:inherit">Exercise Info API — English, 100 records per page</a></li>
+          <li>Collection script: <code>workflows/fetch_exercises.py</code></li>
+          <li>Records were fetched with pagination and flattened into CSV; the raw JSON was preserved.</li>
+          <li>Record-level licence and author information are retained in the dataset.</li>
+        </ul>
+        <p class="notes">Citation: wger Workout Manager. Exercise catalogue and public Exercise Info API. https://wger.de/</p>
+      </div>
+    </section>
+    <section class="slide">
+      <div><span class="eyebrow">Workflow</span>
+        <h1>Step-by-step notebook pipeline</h1>
+        <div class="flow">
+          <article><b>01</b>
+            <h2>Prepare</h2>
+            <p>Audit, clean and transform</p>
+          </article><i>→</i>
+          <article><b>02</b>
+            <h2>Associate</h2>
+            <p>Support, confidence and lift</p>
+          </article><i>→</i>
+          <article><b>03</b>
+            <h2>Cluster</h2>
+            <p>Find similar profiles</p>
+          </article><i>→</i>
+          <article><b>04–06</b>
+            <h2>Predict</h2>
+            <p>Classify, compare and recommend</p>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="split">
+        <div><span class="eyebrow">Data preparation</span>
+          <h1>Clean before mining</h1>
+          <ul>
+            <li>Checked structure, blank values and duplicates</li>
+            <li>Trimmed text without changing the raw dataset</li>
+            <li>Created description, muscle, equipment and image features</li>
+            <li>Saved one prepared CSV for every later notebook</li>
+          </ul>
+        </div><img class="chart" src="output/gym_project/category_distribution.png"
+          alt="Exercise category distribution">
+      </div>
+    </section>
+    <section class="slide">
+      <div><span class="eyebrow">Code evidence · Cleaning</span>
+        <h1>What changed—and why?</h1>
+        <div class="code-grid">
+          <div class="code-panel"><span>Notebook code</span>
+            <pre>clean = df.drop_duplicates().copy()
+text_cols = clean.select_dtypes("object").columns
+clean[text_cols] = clean[text_cols].apply(
+    lambda column: column.str.strip()
+)
+
+clean["description_length"] = (
+    clean["description"].str.len()
+)</pre>
+          </div>
+          <div class="result-panel"><span>Executed result</span><strong>850 → 850</strong>
+            <p>No complete duplicate rows were removed.</p><strong>5</strong>
+            <p>Derived numeric features created for mining.</p>
+          </div>
+        </div>
+        <p class="reason"><b>Why:</b> preserve valid exercises, remove only proven duplication, and convert useful text
+          properties into measurable model inputs.</p>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="split"><img class="chart" src="output/gym_project/association_rules.png"
+          alt="Top association rules">
+        <div><span class="eyebrow">Frequent patterns</span>
+          <h1>What occurs together?</h1>
+          <p><b>Example:</b> Chest category → Chest muscle</p>
+          <ul>
+            <li>Support: how often both occur</li>
+            <li>Confidence: how often B occurs when A occurs</li>
+            <li>Lift: strength compared with chance</li>
+          </ul>
+          <div class="warning">Association describes co-occurrence, not cause and effect.</div>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div><span class="eyebrow">Code evidence · Association</span>
+        <h1>Verify the rule with the formula</h1>
+        <div class="code-grid">
+          <div class="code-panel"><span>How it is calculated</span>
+            <pre>support = count(A and B) / N
+confidence = count(A and B) / count(A)
+lift = confidence / support(B)
+
+if support &gt;= 0.02 and confidence &gt;= 0.40:
+    keep_rule()</pre>
+          </div>
+          <div class="result-panel"><span>Strongest executed rule</span><strong>0.084</strong>
+            <p>Support</p><strong>0.877</strong>
+            <p>Confidence</p><strong>5.644</strong>
+            <p>Lift: much stronger than random chance</p>
+          </div>
+        </div>
+        <p class="reason"><b>What it means:</b> exercises in the Chest category commonly identify Chest as a muscle. It
+          is association—not proof of causation.</p>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="split">
+        <div><span class="eyebrow">Cluster analysis</span>
+          <h1>Exercises form similarity groups</h1>
+          <ul>
+            <li>Compared K-means and hierarchical clustering</li>
+            <li>Tested 2 through 6 clusters</li>
+            <li>Standardized all numeric features</li>
+            <li>Best result: K-means, k = 6</li>
+          </ul>
+          <div class="metric">
+            <div><b>0.335</b><span>Silhouette score</span></div>
+          </div>
+        </div><img class="chart" src="output/gym_project/clusters.png" alt="Exercise clusters">
+      </div>
+    </section>
+    <section class="slide">
+      <div><span class="eyebrow">Clustering evaluation</span>
+        <h1>K-means and hierarchical results</h1>
+        <p class="lead">Silhouette score measures how well each exercise fits its group. Higher is better within the tested range.</p>
+        <table class="results">
+          <thead><tr><th>Number of groups</th><th>K-means</th><th>Hierarchical</th></tr></thead>
+          <tbody>
+            <tr><td>2</td><td>0.277</td><td>0.234</td></tr>
+            <tr><td>3</td><td>0.293</td><td>0.248</td></tr>
+            <tr><td>4</td><td>0.300</td><td>0.264</td></tr>
+            <tr><td>5</td><td>0.321</td><td class="best">0.282</td></tr>
+            <tr><td>6</td><td class="best">0.335</td><td>0.272</td></tr>
+          </tbody>
+        </table>
+        <p class="reason"><b>Result:</b> K-means with 6 groups scored highest overall. Hierarchical performed best at 5 groups. Neither score implies perfect separation or proves the groups are exercise categories.</p>
+      </div>
+    </section>
+    <section class="slide">
+      <div><span class="eyebrow">Classification</span>
+        <h1>Four classification models</h1>
+        <p class="lead">All models predict exercise category from the same features and are evaluated on the same 213 held-out records.</p>
+        <table class="results">
+          <thead><tr><th>Model</th><th>Accuracy</th><th>Weighted precision</th><th>Weighted recall</th><th>Weighted F1</th></tr></thead>
+          <tbody>
+            <tr class="best"><td>Logistic regression</td><td>75.1%</td><td>76.4%</td><td>75.1%</td><td>74.5%</td></tr>
+            <tr><td>Decision tree</td><td>52.1%</td><td>69.8%</td><td>52.1%</td><td>50.0%</td></tr>
+            <tr><td>Naive Bayes</td><td>41.3%</td><td>65.9%</td><td>41.3%</td><td>44.8%</td></tr>
+            <tr><td>Majority baseline</td><td>23.5%</td><td>5.5%</td><td>23.5%</td><td>8.9%</td></tr>
+          </tbody>
+        </table>
+        <p class="reason"><b>Result:</b> Logistic regression has the highest test accuracy and weighted F1. The baseline always predicts the most common training category.</p>
+      </div>
+    </section>
+    <section class="slide">
+      <div><span class="eyebrow">Code evidence · Training</span>
+        <h1>Train once, test on unseen rows</h1>
+        <div class="code-grid">
+          <div class="code-panel"><span>Model workflow</span>
+            <pre>X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25,
+    random_state=42, stratify=y
+)
+
+model.fit(X_train_ready, y_train)
+prediction = model.predict(X_test_ready)</pre>
+          </div>
+          <div class="result-panel"><span>Executed result</span><strong>637 / 213</strong>
+            <p>Training rows / untouched testing rows</p><strong>0.745</strong>
+            <p>Best weighted F1</p><strong>+0.656</strong>
+            <p>F1 improvement over majority baseline</p>
+          </div>
+        </div>
+        <p class="reason"><b>Why:</b> testing on records excluded from fitting gives a more honest estimate than
+          reporting training accuracy.</p>
+      </div>
+    </section>
+    <section class="slide">
+      <div><span class="eyebrow">Recommendation</span>
+        <h1>Use an honest, simple filter</h1>
+        <p class="lead">A user chooses category, equipment and muscle. The system returns matching exercises.</p>
+        <div class="grid">
+          <div class="card">
+            <h2>Input</h2>
+            <p>Arms + Dumbbell</p>
+          </div>
+          <div class="card">
+            <h2>Filter</h2>
+            <p>Match catalogue attributes</p>
+          </div>
+          <div class="card">
+            <h2>Output</h2>
+            <p>Five relevant exercises</p>
+          </div>
+        </div>
+        <div class="warning">There are no member ratings or health outcomes, so this is not medical advice or
+          personalized prediction.</div>
+      </div>
+    </section>
+    <section class="slide">
+      <div><span class="eyebrow">Conclusion</span>
+        <h1>What the project demonstrates</h1>
+        <ul>
+          <li>Complete KDD preparation and visualization</li>
+          <li>Frequent-pattern and association-rule mining</li>
+          <li>K-means and hierarchical clustering</li>
+          <li>Classification with four model types and proper metrics</li>
+        </ul>
+        <p class="notes">Final message: the project discovers useful catalogue patterns while stating its data
+          limitations clearly.</p>
+      </div>
+    </section>
+  </main>
+  <footer><button id="previous" disabled>Previous</button>
+    <div class="progress"><i id="bar"></i></div><span id="counter">1 / 14</span><button id="next">Next</button>
+  </footer>
+  <script>
+    const slides = [...document.querySelectorAll('.slide')], counter = document.querySelector('#counter'), bar = document.querySelector('#bar'), previous = document.querySelector('#previous'), next = document.querySelector('#next'); let current = 0;
+    function show(index) { current = Math.max(0, Math.min(slides.length - 1, index)); slides.forEach((slide, i) => slide.classList.toggle('active', i === current)); counter.textContent = `${current + 1} / ${slides.length}`; bar.style.width = `${(current + 1) / slides.length * 100}%`; previous.disabled = current === 0; next.disabled = current === slides.length - 1 }
+    previous.onclick = () => show(current - 1); next.onclick = () => show(current + 1); addEventListener('keydown', event => { if (['ArrowRight', ' ', 'PageDown'].includes(event.key)) show(current + 1); if (['ArrowLeft', 'PageUp'].includes(event.key)) show(current - 1) }); show(0);
+  </script>
+</body>
+
+</html>
